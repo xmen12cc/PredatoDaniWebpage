@@ -34,7 +34,7 @@ An AI-powered web application that transforms 2D architectural sketches into 3D 
     ```bash
     npm start
     ```
-    The app will be available at `http://localhost:3000`.
+    The app will be available at `http://localhost:3050`.
 
 ## VPS Deployment (Ubuntu)
 
@@ -55,23 +55,20 @@ For a multi-app VPS environment, we use PM2 for process management.
     pm2 startup
     ```
 
-### Cloudflare Tunnel Setup
-To expose the app securely without opening ports:
+### Cloudflare Tunnel Setup (Zero-Config)
+To expose the app securely without a domain or SSL certificate:
 
 1.  **Install Cloudflared**:
     Follow [Cloudflare's official guide](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/install-run/installation/) to install `cloudflared` on your VPS.
-2.  **Authenticate**:
+2.  **Run the Tunnel**:
+    Use the provided script:
     ```bash
-    cloudflared tunnel login
+    bash start-tunnel.sh
     ```
-3.  **Create a Tunnel**:
-    ```bash
-    cloudflared tunnel create arch-gen-tunnel
-    ```
-4.  **Configure DNS**:
-    Route your domain (e.g., `arch.yourdomain.com`) to the tunnel.
-5.  **Run the Tunnel**:
-    You can use the provided `start-tunnel.sh` script or configure it as a service.
+3.  **Access the URL**:
+    Cloudflare will generate a random `.trycloudflare.com` URL in the terminal output. Use this URL to access your application from anywhere.
+
+*Note: This zero-config tunnel is temporary and doesn't require a login or domain.*
 
 ## Project Structure
 - `server.js`: Express server and Gemini API integration.

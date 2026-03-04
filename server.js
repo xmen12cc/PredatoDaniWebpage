@@ -8,7 +8,7 @@ const fs = require('fs');
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3050;
 
 // Logging configuration
 const LOGS_DIR = path.join(__dirname, 'logs');
