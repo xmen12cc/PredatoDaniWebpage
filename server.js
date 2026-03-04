@@ -157,13 +157,14 @@ app.post('/api/generate-3d', async (req, res) => {
             }
         });
 
-        const perspectives = ["isometric front-right view", "isometric back-left view"];
+        // Optimized for faster generation with simpler perspectives
+        const perspectives = ["isometric front view"];
         const results = [];
         let totalUsage = { promptTokenCount: 0, candidatesTokenCount: 0, totalTokenCount: 0 };
 
         for (const view of perspectives) {
-            const prompt = `Based on this architectural plan, generate a high-quality 3D ${view} render of the house. 
-            The render should be photorealistic, showing materials, lighting, and textures.`;
+            const prompt = `Convert this architectural floor plan into a simple 3D ${view} render. 
+            Keep it clean and modern. Focus on basic volumes and structure.`;
 
             const imagePart = {
                 inlineData: {

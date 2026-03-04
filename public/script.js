@@ -90,7 +90,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         generate3DBtn.disabled = true;
         statusMessage.textContent = 'Generating 3D perspectives...';
-        threeDResults.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Processing 3D models (this may take a few moments)...</p>';
+        
+        // Better visual feedback for long tasks
+        threeDResults.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 20px;">
+                <p>Processing 3D models (typically 15-30 seconds)...</p>
+                <div class="progress-container" style="width: 100%; background-color: #f1f1f1; border-radius: 4px; margin-top: 10px;">
+                    <div id="threeDProgress" style="width: 0%; height: 8px; background-color: #4CAF50; border-radius: 4px; transition: width 0.5s;"></div>
+                </div>
+            </div>`;
+
+        // Start a progress bar simulation
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            if (progress < 90) {
+                progress += Math.random() * 5;
+                const progressBar = document.getElementById('threeDProgress');
+                if (progressBar) progressBar.style.width = `${progress}%`;
+            }
+        }, 1000);
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
         try {
             const response = await fetch('/api/generate-3d', {
@@ -101,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     imageBase64: currentBlueprintBase64
                 }),
+                signal: controller.signal
             });
 
             if (!response.ok) {
@@ -108,6 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
+            clearInterval(progressInterval);
+            clearTimeout(timeoutId);
 
             if (data.success) {
                 threeDResults.innerHTML = '';
@@ -135,8 +159,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusMessage.textContent = data.error || 'Failed to generate 3D models.';
             }
         } catch (error) {
+            clearInterval(progressInterval);
+            clearTimeout(timeoutId);
             console.error('3D Generation failed:', error);
-            statusMessage.textContent = `Error: ${error.message}`;
+            
+            if (error.name === 'AbortError') {
+                statusMessage.textContent = 'Error: Generation timed out (took longer than 60s). Please try again.';
+            } else {
+                statusMessage.textContent = `Error: ${error.message}`;
+            }
             threeDResults.innerHTML = '';
         } finally {
             generate3DBtn.disabled = false;
